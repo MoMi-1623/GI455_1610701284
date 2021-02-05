@@ -30,13 +30,11 @@ wss.on("connection",(ws)=>
             if(wslist[i] != ws)
             {
                 wslist[i].send(data + "                                               ");
-                continue;
             }
             if(wslist[i] == ws)
             {
                 wslist[i].send(data);
                 console.log("sent from " + i + " " + data);
-                continue;
             }
         }
     });

@@ -1,13 +1,13 @@
-const app = require('express')();
-const server = require('http').Server(app);
-const websocket = require('ws');
-const wss = new websocket.Server({server});
+const { CONNECTING } = require('ws');
+var websocket = require('ws');
 
-server.listen(process.env.PORT || 8080, ()=>{
-    console.log("Server start at port "+server.address().port);
-});
+var callbackInitServer = ()=>
+{
+    console.log("server is running.");
+}
 
-//var wsList = [];
+var wss = new websocket.Server({port:1623} , callbackInitServer)
+
 var roomList = [];
 /*
 {
@@ -105,8 +105,31 @@ wss.on("connection", (ws)=>{
             // Implementation JoinRoom event when have request from client.
             
             //================= Hint =================
-            //roomList[i].wsList.push(ws);
-
+            for(var i=0;i<roomList.length;i++)
+            {
+                if(toJsonObj.data == roomList[i].roomName) //found
+                {
+                    roomList[i].wsList.push(ws);
+                    var callbackMsg = {
+                        eventName:"JoinRoom",
+                        data:toJsonObj.data
+                    }
+                    var toJsonStr = JSON.stringify(callbackMsg);
+                    ws.send(toJsonStr);
+                    console.log("Join Success");
+                    break;
+                }
+                else if(i == roomList.length-1)
+                {                         
+                    var callbackMsg = {
+                        eventName:"JoinRoom",
+                        data:"fail"
+                    }                                      
+                    var toJsonStr = JSON.stringify(callbackMsg);
+                    ws.send(toJsonStr);
+                    console.log("Join Failed");
+                }
+            }
             console.log("client request JoinRoom");
             //========================================
         }
@@ -124,13 +147,14 @@ wss.on("connection", (ws)=>{
 
                         if(roomList[i].wsList.length <= 0)//If no one left in room remove this room now.
                         {
-                            roomList.splice(i, 1);//Remove at index one time. When room is no one left.
+                            roomList.splice(i, 1);//Remove at index one time. When room is no one left.                        
                         }
                         isLeaveSuccess = true;
                         break;
                     }
                 }
             }
+            
             //===============================================================================
 
             if(isLeaveSuccess)
@@ -202,5 +226,12 @@ wss.on("connection", (ws)=>{
     });
 });
 
+function Boardcast(data)
+{
+    /*for(var i = 0; i < wsList.length; i++)
+    {
+        wsList[i].send(data);
+    }*/
+}
 
 

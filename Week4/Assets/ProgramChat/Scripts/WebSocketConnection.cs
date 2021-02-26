@@ -117,6 +117,32 @@ namespace ChatWebSocket
         public GameObject failCreatePanel;
         public GameObject fail2CreatePanel;
         public bool know = false;
+        //----------------------------
+        public Text userIDText;
+        public Text passwordText;
+        public GameObject loginFailed;
+
+        public Text userIDTextRegis;
+        public Text userNameRegis;
+        public Text passwordTextRegis;
+        public Text rePasswordTextRegis;
+        public GameObject regisFailed;
+        public GameObject registerPanel;
+        public Text playerName;
+
+        public Text inputText;
+        public Text myText;
+        public Text anotherText;
+
+        private void Start()
+        {
+            string url = "ws://127.0.0.1:1623/";
+
+            ws = new WebSocket(url);
+
+            ws.OnMessage += OnMessage;           
+            ws.Connect();
+        }
         private void Update()
         {
             UpdateNotifyMessage();
@@ -213,9 +239,74 @@ namespace ChatWebSocket
                 ws.Close();
         }
 
+        public void Login()
+        {           
+            print(passwordText.text + userIDText.text);           
+            if (passwordText.text == "" || userIDText.text == "")
+            {
+                loginFailed.SetActive(true);
+                return;
+            }
+            else if (passwordText.text != null && userIDText.text != null)
+            {
+                SocketEvent socketEvent = new SocketEvent("Login", userIDText.text + "#" + passwordText.text);
+                string toJsonStr = JsonUtility.ToJson(socketEvent);
+                ws.Send(toJsonStr);
+            }
+
+        }
+
+        public void Register()
+        {
+            
+            if (passwordTextRegis.text == "" || rePasswordTextRegis.text == "" || userIDTextRegis.text == "" || userNameRegis.text == "")
+            {
+                regisFailed.SetActive(true);
+                return;
+            }
+            if (passwordTextRegis.text != rePasswordTextRegis.text)
+            {
+                regisFailed.SetActive(true);
+                return;
+            }
+            else
+            {
+                SocketEvent socketEvent = new SocketEvent("Register", userIDTextRegis.text + "#" + passwordTextRegis.text + "#" + userNameRegis.text);
+                string toJsonStr = JsonUtility.ToJson(socketEvent);
+                ws.Send(toJsonStr);
+            }
+            
+            
+        }
+
+        public void GoToRegisterPanel()
+        {
+            login.SetActive(false);
+            registerPanel.SetActive(true);
+        }
+        public void BackFromLoginError()
+        {
+            loginFailed.SetActive(false);
+            login.SetActive(true);
+            know = true;
+        }
+        public void BackFromRegisError()
+        {
+            regisFailed.SetActive(false);
+            registerPanel.SetActive(false);
+            login.SetActive(true);
+            know = true;
+        }
+
         public void SendMessage(string message)
         {
+            message = inputText.text;
+            SocketEvent socketEvent = new SocketEvent("SendMessage", message + "#" + playerName.text);
 
+            string toJsonStr = JsonUtility.ToJson(socketEvent);
+            ws.Send(toJsonStr);
+            anotherText.text += "" + "\n" + "";
+            myText.text += "\n" + playerName.text + " : " + message;
         }
 
         private void OnDestroy()
@@ -229,7 +320,40 @@ namespace ChatWebSocket
             {
                 SocketEvent receiveMessageData = JsonUtility.FromJson<SocketEvent>(tempMessageString);
 
-                if (receiveMessageData.eventName == "CreateRoom")
+                if(receiveMessageData.eventName == "Login")
+                {
+                    if (OnCreateRoom != null)
+                        OnCreateRoom(receiveMessageData);
+                    know = false;
+                    if (receiveMessageData.data == "fail" && know == false)
+                    {
+                        loginFailed.SetActive(true);
+                    }
+                    else if(receiveMessageData.data != "fail")
+                    {
+                        //เปลี่ยนไปหน้าล็อบบี้
+                        playerName.text = receiveMessageData.data;
+                        lobby.SetActive(true);
+                        login.SetActive(false);
+                    }
+                }
+                else if (receiveMessageData.eventName == "Register")
+                {
+                    if (OnCreateRoom != null)
+                        OnCreateRoom(receiveMessageData);
+                    know = false;
+                    if (receiveMessageData.data == "fail" && know == false)
+                    {
+                        regisFailed.SetActive(true);
+                    }   
+                    else if (receiveMessageData.data != "fail")
+                    {
+                        //เปลี่ยนไปหน้าล็อกอิน
+                        registerPanel.SetActive(false);
+                        login.SetActive(true);
+                    }
+                }
+                else if (receiveMessageData.eventName == "CreateRoom")
                 {
                     if (OnCreateRoom != null)
                         OnCreateRoom(receiveMessageData);
@@ -266,6 +390,21 @@ namespace ChatWebSocket
                     if (OnLeaveRoom != null)
                         OnLeaveRoom(receiveMessageData);
                 }
+                else if(receiveMessageData.eventName == "SendMessage")
+                {
+                    if (OnLeaveRoom != null)
+                        OnLeaveRoom(receiveMessageData);
+                    print(receiveMessageData.data);
+                    var splitStr = receiveMessageData.data.Split('#');
+                    print(splitStr[1]);
+                    var pName = splitStr[1];
+                    var message = splitStr[0];
+                    if (playerName.text != pName)
+                    {
+                        myText.text += "" + "\n" + "";
+                        anotherText.text += "\n" + pName + " : " + message;
+                    }
+                }
 
                 tempMessageString = "";
             }
@@ -277,5 +416,14 @@ namespace ChatWebSocket
 
             tempMessageString = messageEventArgs.Data;
         }
+        //public void LoginWithUserID()
+        //{
+
+        //}
+        //public void RegisterUserID()
+        //{
+
+        //}
+        
     }
 }

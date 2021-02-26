@@ -27,6 +27,7 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.Image
     - UnityEngine.UI.InputField
     - UnityEngine.UI.Text
+    - UnityEngine.UI.VerticalLayoutGroup
   sceneClasses:
     Assets/ProgramChat/Scenes/SampleScene.unity:
     - Class: 1
@@ -57,6 +58,8 @@ ScriptsOnlyBuild:
       Script: {instanceID: 12370}
     - Class: 114
       Script: {instanceID: 12828}
+    - Class: 114
+      Script: {instanceID: 12934}
     - Class: 114
       Script: {instanceID: 13042}
     - Class: 114
@@ -434,7 +437,7 @@ ScriptsOnlyBuild:
     className: BaseInput
   - hash:
       serializedVersion: 2
-      Hash: f832f2d7ccfb461a3e5aeee7ca4b4763
+      Hash: d15f66b20619bdd195ecbe22e4c6eb28
     assemblyName: Assembly-CSharp.dll
     namespaceName: ChatWebSocket
     className: WebSocketConnection
@@ -513,5 +516,5 @@ ScriptsOnlyBuild:
   platform: 5
   scenePathNames:
   - Assets/ProgramChat/Scenes/SampleScene.unity
-  playerPath: C:/Users/HP_OMEN/Desktop/GI455/GI455_1610701284/GI455_1610701284/Assignment
-    week2/Game/Assignment week4/Assignment week2.exe
+  playerPath: C:/Users/HP_OMEN/Desktop/GI455/GI455_1610701284/GI455_1610701284/Week4/Game/w5/Assignment
+    week2.exe
